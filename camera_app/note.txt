@@ -1,0 +1,56 @@
+flutter doctor -v
+flutter create camera_app
+cd camera_app
+flutter create --platforms=macos .
+flutter clean
+flutter pub get
+flutter pub upgrade
+
+
+camera_app/pubspec.yaml:
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.10.0+4
+  path_provider: ^2.0.11
+
+
+camera_app/android/app/src/main/AndroidManifest.xml:
+<manifest>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+</manifest>
+
+
+camera_app/ios/Runner/Info.plist:
+<dict>
+    <key>NSCameraUsageDescription</key>
+    <string>We need access to your camera for video streaming.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We need access to your microphone for recording videos.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library to select images.</string>
+</dict>
+
+
+open ios/Runner.xcworkspace
+xcodebuild -runFirstLaunch
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+
+flutter clean
+flutter pub get
+cd ios
+rm -rf Pods
+rm -rf Podfile.lock
+pod install
+cd ..
+flutter pub get
+
+
+flutter devices
+flutter emulators --launch apple_ios_simulator
+flutter emulators --launch Pixel_3a_API_34_extension_level_7_arm64-v8a
+flutter run -d 00008020-001579961484003A
+flutter run -d macos
+flutter run -d chrome
