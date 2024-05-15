@@ -43,6 +43,10 @@ flutter pub get
 cd ios
 rm -rf Pods
 rm -rf Podfile.lock
+pod deintegrate
+sudo gem install cocoapods-clean
+pod clean
+pod setup
 pod install --repo-update
 pod install
 cd ..
