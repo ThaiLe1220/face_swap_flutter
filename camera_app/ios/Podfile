@@ -1,15 +1,18 @@
-# Uncomment this line to define a global platform for your project
-platform :ios, '12.0'
+# Set the global platform version to iOS 15.5 or newer
+platform :ios, '15.5'
 
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+# Disable CocoaPods analytics to avoid sending network stats synchronously
+# which can affect Flutter build latency
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
+# Define the project configuration for Debug, Profile, and Release builds
 project 'Runner', {
   'Debug' => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
 
+# Function to determine the Flutter root directory
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
   unless File.exist?(generated_xcode_build_settings_path)
@@ -23,29 +26,55 @@ def flutter_root
   raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
 end
 
+# Require the Flutter pod helper script
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
+# Set up Flutter-specific iOS podfile configuration
 flutter_ios_podfile_setup
 
+# Define the minimum iOS version for the build settings
+$iOSVersion = '12.0'  # or newer version
+
+# Define the target for the Runner project
 target 'Runner' do
+  # Use frameworks and modular headers
   use_frameworks!
   use_modular_headers!
 
+  # Install all iOS pods for Flutter
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  
+  # Define the target for RunnerTests and inherit search paths
   target 'RunnerTests' do
     inherit! :search_paths
   end
 end
 
+# Post-installation hook to adjust build settings
 post_install do |installer|
   installer.pods_project.targets.each do |target|
+    # Add additional iOS build settings for Flutter
     flutter_additional_ios_build_settings(target)
+    
+    # Adjust the deployment target for each build configuration
+    target.build_configurations.each do |config|
+      if Gem::Version.new($iOSVersion) > Gem::Version.new(config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'])
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = $iOSVersion
+      end
+    end
   end
-  
+
   installer.pods_project.build_configurations.each do |config|
+    # Ensure that only the active architecture is built
     config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
 
     # Exclude arm64 architecture when building for the simulator
     config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+
+    # Exclude armv7 architecture for all SDKs to avoid compatibility issues
+    config.build_settings["EXCLUDED_ARCHS[sdk=*]"] = "armv7"
+    
+    # Set the iOS deployment target to the specified minimum version
+    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = $iOSVersion
   end
 end

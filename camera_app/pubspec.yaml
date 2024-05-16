@@ -31,11 +31,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: ^0.10.0+4
+  camera: ^0.11.0
   path_provider: ^2.0.11
-  image_picker: ^0.8.5+3
+  image_picker: ^1.1.1
   video_player: ^2.2.19
   opencv_4: ^1.0.0
+  google_ml_kit: ^0.18.0
+
+  # firebase_core: ^2.31.0
+  # firebase_ml_model_downloader: ^0.2.5+4
   # webview_flutter: ^3.0.4
 
   # The following adds the Cupertino Icons font to your application.
@@ -51,7 +55,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
