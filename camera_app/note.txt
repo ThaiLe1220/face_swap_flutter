@@ -5,6 +5,7 @@ flutter create --platforms=macos .
 flutter clean
 flutter pub get
 flutter pub upgrade
+sudo gem install cocoapods-clean
 
 
 camera_app/pubspec.yaml:
@@ -40,15 +41,14 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 flutter clean
 flutter pub get
+flutter pub upgrade
 cd ios
 rm -rf Pods
 rm -rf Podfile.lock
 rm -rf ~/Library/Developer/Xcode/DerivedData
 pod deintegrate
-sudo gem install cocoapods-clean
 pod setup
 pod install --repo-update
-pod install
 cd ..
 flutter pub get
 
@@ -56,6 +56,6 @@ flutter pub get
 flutter devices
 flutter emulators --launch apple_ios_simulator
 flutter emulators --launch Pixel_3a_API_34_extension_level_7_arm64-v8a
-flutter run -d 00008020-001579961484003A
+flutter run -d 5F8105A6-B700-4073-911A-634D4BFDCBFB
 flutter run -d macos
 flutter run -d chrome
