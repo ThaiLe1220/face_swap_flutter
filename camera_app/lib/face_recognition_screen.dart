@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:math'; // For the Point class
 import 'dart:ui' as ui; // For image handling
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; // Flutter UI components
 import 'package:image_picker/image_picker.dart'; // For picking images from the gallery
 import 'package:google_ml_kit/google_ml_kit.dart'; // Google's ML Kit for face detection
@@ -23,10 +26,13 @@ class FaceRecognitionScreenState extends State<FaceRecognitionScreen> {
     enableContours: true, // Enable contour detection
     enableLandmarks: true, // Enable landmark detection
     enableClassification: true, // Enable classification (e.g., smiling)
-    // enableTracking: true, // Enable face tracking
+    enableTracking: true, // Enable face tracking
     performanceMode:
         FaceDetectorMode.accurate, // Use accurate mode for better results
   ));
+
+  String _infoText = ''; // Text to display face information
+  String _contourInfoText = ''; // Text to display contour information
 
   // Function to pick an image from the gallery
   Future pickImage() async {
@@ -40,9 +46,11 @@ class FaceRecognitionScreenState extends State<FaceRecognitionScreen> {
         _image = imageFile; // Set the selected image
         _imageInfo = imageInfo; // Set the image info with dimensions
       });
-      detectFaces(imageFile); // Detect faces in the selected image
+      await detectFaces(imageFile); // Detect faces in the selected image
     } else {
-      print('No image selected.');
+      if (kDebugMode) {
+        print('No image selected.');
+      }
     }
   }
 
@@ -60,6 +68,40 @@ class FaceRecognitionScreenState extends State<FaceRecognitionScreen> {
 
     setState(() {
       _faces = faces; // Update the list of detected faces
+
+      // Collect and print face information
+      _infoText = '';
+      _contourInfoText = '';
+      int totalContours = 0;
+      for (Face face in _faces) {
+        String info = 'Face ID: ${face.trackingId}\n';
+        info += 'Smiling Probability: ${face.smilingProbability ?? "N/A"}\n';
+        info +=
+            'Left Eye Open Probability: ${face.leftEyeOpenProbability ?? "N/A"}\n';
+        info +=
+            'Right Eye Open Probability: ${face.rightEyeOpenProbability ?? "N/A"}\n';
+        if (kDebugMode) {
+          print(info);
+        } // Print info to console
+        _infoText += '$info\n';
+
+        // Collect and print contour information
+        for (FaceContourType contourType in face.contours.keys) {
+          final contour = face.contours[contourType];
+          if (contour != null) {
+            _contourInfoText += 'Contour ${contourType.name}:\n';
+            for (Point<int> point in contour.points) {
+              final position = point.toDouble();
+              _contourInfoText += '(${position.x}, ${position.y})\n';
+              totalContours++;
+            }
+          }
+        }
+      }
+      _contourInfoText = 'Total Contours: $totalContours\n\n$_contourInfoText';
+      if (kDebugMode) {
+        print(_contourInfoText); // Print contour info to console
+      }
     });
   }
 
@@ -91,70 +133,67 @@ class FaceRecognitionScreenState extends State<FaceRecognitionScreen> {
                         double scale = min(
                             scaleX, scaleY); // Scale to fit within constraints
 
-                        return SizedBox(
-                          width: _imageInfo.width * scale, // Scale width
-                          height: _imageInfo.height * scale, // Scale height
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.file(_image!),
-                              // Display rectangles around detected faces
-                              // ..._faces.map((face) => Positioned(
-                              //       left: (face.boundingBox.left /
-                              //               _imageInfo.width) *
-                              //           _imageInfo.width *
-                              //           scale,
-                              //       top: (face.boundingBox.top /
-                              //               _imageInfo.height) *
-                              //           _imageInfo.height *
-                              //           scale,
-                              //       width: (face.boundingBox.width /
-                              //               _imageInfo.width) *
-                              //           _imageInfo.width *
-                              //           scale,
-                              //       height: (face.boundingBox.height /
-                              //               _imageInfo.height) *
-                              //           _imageInfo.height *
-                              //           scale,
-                              //       child: Container(
-                              //         decoration: BoxDecoration(
-                              //           border: Border.all(
-                              //             color: Colors.red,
-                              //             width: 0.5,
-                              //           ),
-                              //         ),
-                              //       ),
-                              //     )),
-                              // Display contours on detected faces with smaller dots
-                              ..._faces.expand((face) =>
-                                  face.contours.values.expand((contour) {
-                                    if (contour == null) {
-                                      return [];
-                                    }
-                                    return contour.points.map((point) {
-                                      final position = point.toDouble();
-                                      return Positioned(
-                                        left: (position.x / _imageInfo.width) *
-                                            _imageInfo.width *
-                                            scale,
-                                        top: (position.y / _imageInfo.height) *
-                                            _imageInfo.height *
-                                            scale,
-                                        child: const Icon(
-                                          Icons.circle,
-                                          color: Colors.blue,
-                                          size:
-                                              2, // Smaller dot size for contours
-                                        ),
-                                      );
-                                    });
-                                  })),
-                            ],
-                          ),
+                        return Column(
+                          children: [
+                            SizedBox(
+                              width: _imageInfo.width * scale, // Scale width
+                              height: _imageInfo.height * scale, // Scale height
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.file(_image!),
+                                  // Display contours on detected faces with smaller dots
+                                  ..._faces.expand((face) =>
+                                      face.contours.values.expand((contour) {
+                                        if (contour == null) {
+                                          return [];
+                                        }
+                                        return contour.points.map((point) {
+                                          final position = point.toDouble();
+                                          return Positioned(
+                                            left: (position.x /
+                                                    _imageInfo.width) *
+                                                _imageInfo.width *
+                                                scale,
+                                            top: (position.y /
+                                                    _imageInfo.height) *
+                                                _imageInfo.height *
+                                                scale,
+                                            child: const Icon(
+                                              Icons.circle,
+                                              color: Colors.blue,
+                                              size:
+                                                  2, // Smaller dot size for contours
+                                            ),
+                                          );
+                                        });
+                                      })),
+                                ],
+                              ),
+                            ),
+                            // Display face information in a text box
+                            Container(
+                              padding: const EdgeInsets.all(8.0),
+                              color: Colors.black.withOpacity(0.7),
+                              child: Text(
+                                _infoText,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            // Display contour information in a text box
+                            Container(
+                              padding: const EdgeInsets.all(8.0),
+                              color: Colors.black.withOpacity(0.7),
+                              child: Text(
+                                _contourInfoText,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed:
                     pickImage, // Button to pick an image from the gallery
