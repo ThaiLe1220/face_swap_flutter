@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -7,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:native_opencv/native_opencv.dart';
 
+// Stateful widget for the face morphing screen
 class FaceMorphScreen extends StatefulWidget {
   const FaceMorphScreen({super.key});
 
@@ -15,24 +18,30 @@ class FaceMorphScreen extends StatefulWidget {
 }
 
 class FaceMorphScreenState extends State<FaceMorphScreen> {
-  File? _image1;
-  File? _image2;
-  String? _outputImagePath;
-  List<Point<double>> _contours1 = [];
-  List<Point<double>> _contours2 = [];
-  List<int> _delaunayTriangles = [];
-  late ui.Image _imageInfo1;
-  late ui.Image _imageInfo2;
-  final picker = ImagePicker();
+  File? _image1; // Variable to store the first image file
+  File? _image2; // Variable to store the second image file
+  String? _outputImagePath; // Variable to store the path of the morphed image
+  List<Point<double>> _contours1 =
+      []; // List to store face contours from the first image
+  List<Point<double>> _contours2 =
+      []; // List to store face contours from the second image
+  List<int> _delaunayTriangles = []; // List to store Delaunay triangles
+  late ui.Image
+      _imageInfo1; // Variable to store image information for the first image
+  late ui.Image
+      _imageInfo2; // Variable to store image information for the second image
+  final picker = ImagePicker(); // Instance of ImagePicker for selecting images
   final faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
     enableContours: true,
     enableLandmarks: true,
     enableClassification: true,
     enableTracking: true,
     performanceMode: FaceDetectorMode.accurate,
-  ));
-  final NativeOpencv _nativeOpencv = NativeOpencv();
+  )); // Configuring the face detector with various options
+  final NativeOpencv _nativeOpencv =
+      NativeOpencv(); // Instance of NativeOpencv for OpenCV operations
 
+  // Function to pick an image from the gallery
   Future<void> _pickImage(int imageNumber) async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -55,11 +64,13 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
     }
   }
 
+  // Function to load an image and return its information
   Future<ui.Image> _loadImage(File imageFile) async {
     final data = await imageFile.readAsBytes();
     return await decodeImageFromList(data);
   }
 
+  // Function to detect faces in the provided image
   Future<void> _detectFaces(File image, int imageNumber) async {
     final inputImage = InputImage.fromFile(image);
     final faces = await faceDetector.processImage(inputImage);
@@ -95,6 +106,7 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
     }
   }
 
+  // Function to compute correspondences between the contours of the two images
   void _computeCorrespondences() {
     int count = min(_contours1.length, _contours2.length);
     List<Point<double>> correspondences = List.generate(count, (index) {
@@ -111,6 +123,7 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
     }
   }
 
+  // Function to compute Delaunay triangulation for the contours
   void _computeDelaunay() {
     if (_contours1.isEmpty || _contours2.isEmpty) return;
 
@@ -140,6 +153,7 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
     }
   }
 
+  // Function to morph the images using the computed Delaunay triangulation and contours
   Future<void> _morphImages(double alpha) async {
     if (_image1 == null ||
         _image2 == null ||
@@ -181,12 +195,14 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
     }
   }
 
+  // Dispose function to release resources
   @override
   void dispose() {
     faceDetector.close();
     super.dispose();
   }
 
+  // Building the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -228,6 +244,7 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
     );
   }
 
+  // Function to build the widget displaying the image
   Widget _buildImage(File imageFile, ui.Image imageInfo) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

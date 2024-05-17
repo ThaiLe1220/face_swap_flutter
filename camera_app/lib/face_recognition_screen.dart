@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart'; // For picking images from the 
 import 'package:google_ml_kit/google_ml_kit.dart'; // Google's ML Kit for face detection
 import 'dart:io'; // For File operations
 
+// Stateful widget for the face recognition screen
 class FaceRecognitionScreen extends StatefulWidget {
   const FaceRecognitionScreen({super.key});
 

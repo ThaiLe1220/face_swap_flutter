@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:native_opencv/native_opencv.dart';
 
+// Stateful widget for the Delaunay triangulation screen
 class TriListsScreen extends StatefulWidget {
   const TriListsScreen({super.key});
 
@@ -17,31 +18,32 @@ class TriListsScreen extends StatefulWidget {
 }
 
 class TriListsScreenState extends State<TriListsScreen> {
-  File? _image;
-  List<Face> _faces = [];
-  List<Point<double>> _contours = [];
-  List<int> _delaunayTriangles = [];
-  late ui.Image _imageInfo;
-  final picker = ImagePicker();
+  File? _image; // Variable to store the selected image file
+  List<Face> _faces = []; // List to store detected faces
+  List<Point<double>> _contours = []; // List to store face contours
+  List<int> _delaunayTriangles = []; // List to store Delaunay triangles
+  late ui.Image _imageInfo; // Variable to store image information
+  final picker = ImagePicker(); // Image picker instance
   final faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
     enableContours: true,
     enableLandmarks: true,
     enableClassification: true,
     enableTracking: true,
     performanceMode: FaceDetectorMode.accurate,
-  ));
-  final NativeOpencv _nativeOpencv = NativeOpencv();
+  )); // Configuring the face detector with various options
+  final NativeOpencv _nativeOpencv = NativeOpencv(); // Instance of NativeOpencv
 
+  // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
-      final imageInfo = await _loadImage(imageFile);
+      final imageInfo = await _loadImage(imageFile); // Load image dimensions
       setState(() {
-        _image = imageFile;
-        _imageInfo = imageInfo;
+        _image = imageFile; // Set the selected image
+        _imageInfo = imageInfo; // Set the image info with dimensions
       });
-      await _detectFaces(imageFile);
+      await _detectFaces(imageFile); // Detect faces in the selected image
     } else {
       if (kDebugMode) {
         print('No image selected.');
@@ -49,14 +51,17 @@ class TriListsScreenState extends State<TriListsScreen> {
     }
   }
 
+  // Function to load the image and get its dimensions
   Future<ui.Image> _loadImage(File imageFile) async {
-    final data = await imageFile.readAsBytes();
-    return await decodeImageFromList(data);
+    final data = await imageFile.readAsBytes(); // Read image bytes
+    return await decodeImageFromList(data); // Decode image to get dimensions
   }
 
+  // Function to detect faces in the selected image
   Future<void> _detectFaces(File image) async {
-    final inputImage = InputImage.fromFile(image);
-    final faces = await faceDetector.processImage(inputImage);
+    final inputImage =
+        InputImage.fromFile(image); // Create InputImage from file
+    final faces = await faceDetector.processImage(inputImage); // Detect faces
     List<Point<double>> contours = [];
     for (var face in faces) {
       for (var contour in face.contours.values) {
@@ -68,9 +73,9 @@ class TriListsScreenState extends State<TriListsScreen> {
       }
     }
     setState(() {
-      _faces = faces;
-      _contours = contours;
-      _computeDelaunay();
+      _faces = faces; // Update the list of detected faces
+      _contours = contours; // Update the list of face contours
+      _computeDelaunay(); // Compute Delaunay triangulation
     });
 
     if (kDebugMode) {
@@ -81,6 +86,7 @@ class TriListsScreenState extends State<TriListsScreen> {
     }
   }
 
+  // Function to compute Delaunay triangulation
   void _computeDelaunay() {
     if (_contours.isEmpty) return;
 
@@ -110,12 +116,14 @@ class TriListsScreenState extends State<TriListsScreen> {
     }
   }
 
+  // Dispose function to release resources
   @override
   void dispose() {
     faceDetector.close();
     super.dispose();
   }
 
+  // Building the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,6 +150,7 @@ class TriListsScreenState extends State<TriListsScreen> {
     );
   }
 
+  // Function to build the widget displaying the image with contours and Delaunay triangles
   Widget _buildImageWithContoursAndTriangles(File imageFile, ui.Image imageInfo,
       List<Point<double>> contours, List<int> delaunayTriangles) {
     return LayoutBuilder(
@@ -158,6 +167,7 @@ class TriListsScreenState extends State<TriListsScreen> {
                 fit: StackFit.expand,
                 children: [
                   Image.file(imageFile),
+                  // Display Delaunay triangles points
                   ...delaunayTriangles.map((index) {
                     final point = contours[index];
                     return Positioned(

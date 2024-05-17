@@ -1,9 +1,11 @@
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:native_opencv/native_opencv.dart';
+import 'dart:io'; // For file operations
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart'; // Flutter UI components
+import 'package:image_picker/image_picker.dart'; // For picking images from the gallery
+import 'package:path_provider/path_provider.dart'; // For accessing the file system
+import 'package:native_opencv/native_opencv.dart'; // OpenCV plugin for image processing
 
+// Stateful widget for the mobile camera screen
 class MobileCameraScreen extends StatefulWidget {
   const MobileCameraScreen({super.key});
   @override
@@ -11,15 +13,18 @@ class MobileCameraScreen extends StatefulWidget {
 }
 
 class MobileCameraScreenState extends State<MobileCameraScreen> {
-  final List<File> _imageFiles = [];
-  final List<File> _originalImageFiles = [];
-  int _currentIndex = 0;
-  final ImagePicker _picker = ImagePicker();
-  bool _isGrayscale = false;
+  final List<File> _imageFiles = []; // List to store selected image files
+  final List<File> _originalImageFiles =
+      []; // List to store original image files
+  int _currentIndex = 0; // Index to track the current image
+  final ImagePicker _picker = ImagePicker(); // Image picker instance
+  bool _isGrayscale =
+      false; // Flag to indicate if the current image is grayscale
   bool _isProcessing = false; // Flag to prevent multiple operations
 
   final NativeOpencv _opencv = NativeOpencv(); // Instance of NativeOpencv
 
+  // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     if (_isProcessing) return; // Prevent multiple operations
     _isProcessing = true;
@@ -39,16 +44,18 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
         });
       }
     } catch (e) {
-      print('Error picking image: $e');
+      if (kDebugMode) {
+        print('Error picking image: $e');
+      }
     }
 
     _isProcessing = false;
   }
 
+  // Function to convert the current image to grayscale
   Future<void> _convertToGrayscale() async {
-    if (_imageFiles.isEmpty || _isProcessing) {
+    if (_imageFiles.isEmpty || _isProcessing)
       return; // Prevent multiple operations
-    }
     _isProcessing = true;
 
     try {
@@ -77,7 +84,9 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
         }
       }
     } catch (e) {
-      print('Error converting image: $e');
+      if (kDebugMode) {
+        print('Error converting image: $e');
+      }
       setState(() {
         _isGrayscale = false; // Revert the grayscale flag on error
       });
@@ -86,6 +95,7 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
     _isProcessing = false;
   }
 
+  // Function to show the next image
   void _showNextImage() {
     if (_isProcessing) return; // Prevent multiple operations
 
@@ -97,6 +107,7 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
     });
   }
 
+  // Function to show the previous image
   void _showPreviousImage() {
     if (_isProcessing) return; // Prevent multiple operations
 
@@ -123,8 +134,10 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
                 children: [
                   Expanded(
                     child: Center(
-                      child: Image.file(_imageFiles[_currentIndex],
-                          fit: BoxFit.contain),
+                      child: Image.file(
+                        _imageFiles[_currentIndex],
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                   Padding(

@@ -155,7 +155,7 @@ class NativeOpencv {
         alpha,
         outputPathPointer);
 
-    malloc.free(img1PathPointer); 
+    malloc.free(img1PathPointer);
     malloc.free(img2PathPointer);
     malloc.free(points1Pointer);
     malloc.free(points2Pointer);

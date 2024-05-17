@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 
+// Stateful widget for the face correspondences screen
 class FaceCorrespondencesScreen extends StatefulWidget {
   const FaceCorrespondencesScreen({super.key});
 
@@ -17,28 +18,37 @@ class FaceCorrespondencesScreen extends StatefulWidget {
 }
 
 class FaceCorrespondencesScreenState extends State<FaceCorrespondencesScreen> {
-  File? _image1;
-  File? _image2;
-  List<Face> _faces1 = [];
-  List<Face> _faces2 = [];
-  List<Point<double>> _contours1 = [];
-  List<Point<double>> _contours2 = [];
-  List<Point<double>> _correspondences = [];
-  late ui.Image _imageInfo1;
-  late ui.Image _imageInfo2;
-  final picker = ImagePicker();
+  File? _image1; // Variable to store the first image file
+  File? _image2; // Variable to store the second image file
+  List<Face> _faces1 = []; // List to store detected faces from the first image
+  List<Face> _faces2 = []; // List to store detected faces from the second image
+  List<Point<double>> _contours1 =
+      []; // List to store face contours from the first image
+  List<Point<double>> _contours2 =
+      []; // List to store face contours from the second image
+  List<Point<double>> _correspondences =
+      []; // List to store correspondences between contours
+  late ui.Image
+      _imageInfo1; // Variable to store image information for the first image
+  late ui.Image
+      _imageInfo2; // Variable to store image information for the second image
+  final picker = ImagePicker(); // Instance of ImagePicker for selecting images
   final faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
     enableContours: true,
     enableLandmarks: true,
     enableClassification: true,
     enableTracking: true,
     performanceMode: FaceDetectorMode.accurate,
-  ));
+  )); // Configuring the face detector with various options
 
-  String _contourInfoText1 = '';
-  String _contourInfoText2 = '';
-  String _correspondenceInfoText = '';
+  String _contourInfoText1 =
+      ''; // String to store contour information for the first image
+  String _contourInfoText2 =
+      ''; // String to store contour information for the second image
+  String _correspondenceInfoText =
+      ''; // String to store correspondence information
 
+  // Function to pick an image from the gallery
   Future<void> _pickImage(int imageNumber) async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -61,11 +71,13 @@ class FaceCorrespondencesScreenState extends State<FaceCorrespondencesScreen> {
     }
   }
 
+  // Function to load an image and return its information
   Future<ui.Image> _loadImage(File imageFile) async {
     final data = await imageFile.readAsBytes();
     return await decodeImageFromList(data);
   }
 
+  // Function to detect faces in the provided image
   Future<void> _detectFaces(File image, int imageNumber) async {
     final inputImage = InputImage.fromFile(image);
     final faces = await faceDetector.processImage(inputImage);
@@ -109,6 +121,7 @@ class FaceCorrespondencesScreenState extends State<FaceCorrespondencesScreen> {
     }
   }
 
+  // Function to compute correspondences between the contours of the two images
   void _computeCorrespondences() {
     int count = min(_contours1.length, _contours2.length);
     _correspondences = List.generate(count, (index) {
@@ -128,12 +141,14 @@ class FaceCorrespondencesScreenState extends State<FaceCorrespondencesScreen> {
     }
   }
 
+  // Dispose function to release resources
   @override
   void dispose() {
     faceDetector.close();
     super.dispose();
   }
 
+  // Building the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -171,6 +186,7 @@ class FaceCorrespondencesScreenState extends State<FaceCorrespondencesScreen> {
     );
   }
 
+  // Function to build the widget displaying the image with contours
   Widget _buildImageWithContours(File imageFile, ui.Image imageInfo,
       List<Point<double>> contours, String contourInfoText) {
     return LayoutBuilder(
@@ -215,6 +231,7 @@ class FaceCorrespondencesScreenState extends State<FaceCorrespondencesScreen> {
     );
   }
 
+  // Function to build the widget displaying the correspondences
   Widget _buildCorrespondences() {
     return Column(
       children: [
