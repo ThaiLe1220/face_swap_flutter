@@ -44,6 +44,9 @@ target 'Runner' do
   # Install all iOS pods for Flutter
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
+  # Add OpenCV framework
+  # pod 'OpenCV', :path => '../opencv2.framework'
+  
   # Define the target for RunnerTests and inherit search paths
   target 'RunnerTests' do
     inherit! :search_paths

@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:opencv_4/factory/pathfrom.dart';
-import 'package:opencv_4/opencv_4.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:native_opencv/native_opencv.dart';
 
 class MobileCameraScreen extends StatefulWidget {
   const MobileCameraScreen({super.key});
@@ -19,6 +17,8 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _isGrayscale = false;
   bool _isProcessing = false; // Flag to prevent multiple operations
+
+  final NativeOpencv _opencv = NativeOpencv(); // Instance of NativeOpencv
 
   Future<void> _pickImage() async {
     if (_isProcessing) return; // Prevent multiple operations
@@ -46,8 +46,9 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
   }
 
   Future<void> _convertToGrayscale() async {
-    if (_imageFiles.isEmpty || _isProcessing)
+    if (_imageFiles.isEmpty || _isProcessing) {
       return; // Prevent multiple operations
+    }
     _isProcessing = true;
 
     try {
@@ -58,16 +59,17 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
           _isGrayscale = false;
         });
       } else {
-        // Convert to grayscale
-        final grayBytes = await Cv2.cvtColor(
-          pathFrom: CVPathFrom.GALLERY_CAMERA,
-          pathString: _originalImageFiles[_currentIndex]
-              .path, // Use the original image for conversion
-          outputType: Cv2.COLOR_BGR2GRAY,
+        // Convert to grayscale using native plugin
+        final directory = await getTemporaryDirectory();
+        final outputPath =
+            '${directory.path}/${DateTime.now().millisecondsSinceEpoch}_gray.png';
+        _opencv.convertToGrayScale(
+          _originalImageFiles[_currentIndex].path,
+          outputPath,
         );
 
-        if (grayBytes != null) {
-          final grayImageFile = await _saveBytesAsFile(grayBytes);
+        final grayImageFile = File(outputPath);
+        if (await grayImageFile.exists()) {
           setState(() {
             _imageFiles[_currentIndex] = grayImageFile;
             _isGrayscale = true;
@@ -82,15 +84,6 @@ class MobileCameraScreenState extends State<MobileCameraScreen> {
     }
 
     _isProcessing = false;
-  }
-
-  Future<File> _saveBytesAsFile(Uint8List bytes) async {
-    final directory = await getTemporaryDirectory();
-    final imagePath =
-        '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.png';
-    final file = File(imagePath);
-    await file.writeAsBytes(bytes);
-    return file;
   }
 
   void _showNextImage() {

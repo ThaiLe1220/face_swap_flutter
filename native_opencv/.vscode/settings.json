@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "iosfwd": "cpp"
+    },
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

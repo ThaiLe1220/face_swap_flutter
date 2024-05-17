@@ -236,17 +236,12 @@ PODS:
     - nanopb/encode (= 2.30910.0)
   - nanopb/decode (2.30910.0)
   - nanopb/encode (2.30910.0)
-  - OpenCV2 (4.3.0)
-  - opencv_4 (0.0.1):
+  - native_opencv (0.0.1):
     - Flutter
-    - OpenCV2 (= 4.3.0)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.4.0)
-  - sqflite (0.0.3):
-    - Flutter
-    - FlutterMacOS
   - SSZipArchive (2.5.5)
   - video_player_avfoundation (0.0.1):
     - Flutter
@@ -270,9 +265,8 @@ DEPENDENCIES:
   - google_mlkit_text_recognition (from `.symlinks/plugins/google_mlkit_text_recognition/ios`)
   - google_mlkit_translation (from `.symlinks/plugins/google_mlkit_translation/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
-  - opencv_4 (from `.symlinks/plugins/opencv_4/ios`)
+  - native_opencv (from `.symlinks/plugins/native_opencv/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
 
 SPEC REPOS:
@@ -311,7 +305,6 @@ SPEC REPOS:
     - MLKitVisionKit
     - MLKitXenoCommon
     - nanopb
-    - OpenCV2
     - PromisesObjC
     - SSZipArchive
 
@@ -350,12 +343,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/google_mlkit_translation/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
-  opencv_4:
-    :path: ".symlinks/plugins/opencv_4/ios"
+  native_opencv:
+    :path: ".symlinks/plugins/native_opencv/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
-  sqflite:
-    :path: ".symlinks/plugins/sqflite/darwin"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
 
@@ -411,14 +402,12 @@ SPEC CHECKSUMS:
   MLKitVisionKit: 6d2ea9741b262ec0fed2a5a3de521cfa671c6e83
   MLKitXenoCommon: 39060e7a54769d97a877152c59a1898e7f8d9e35
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
-  OpenCV2: ffe82e5cb5d16dc3fc01a5f4127b9a5b3cfc7d1b
-  opencv_4: 0da310f635aa2f506bcb30b3e85365a74e55ab18
+  native_opencv: e6319e2e29be56bad201dbb2d1c27168ca1d71c4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
 
-PODFILE CHECKSUM: c115f85d3f9c3898fdbcb9415c33546c01178c88
+PODFILE CHECKSUM: 754f78e2890bc729f2eef36141488b38b32f6cf9
 
 COCOAPODS: 1.15.2

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'mobile_camera_screen.dart';
 import 'text_recognition_screen.dart';
+import 'face_recognition_screen.dart'; // Import the new screen
 
 void main() {
   runApp(const MyApp());
@@ -54,6 +55,17 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text('Go to Text Recognition Screen'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FaceRecognitionScreen()),
+                );
+              },
+              child: const Text('Go to Face Recognition Screen'),
             ),
           ],
         ),
