@@ -12,6 +12,7 @@ final DynamicLibrary nativeLib = Platform.isAndroid
     : DynamicLibrary.process();
 
 // Define the signatures of the C functions
+// Define the signatures of the C functions
 typedef _c_version = Pointer<Utf8> Function();
 typedef _c_convertToGrayScale = Pointer<Utf8> Function(
     Pointer<Utf8> inputImagePath, Pointer<Utf8> outputImagePath);
@@ -22,6 +23,15 @@ typedef _c_makeDelaunay = Pointer<Utf8> Function(
     Int32 points_size,
     Pointer<Int32> result,
     Pointer<Int32> result_size);
+typedef _c_morphImages = Pointer<Utf8> Function(
+    Pointer<Utf8> img1Path,
+    Pointer<Utf8> img2Path,
+    Pointer<Float> points1,
+    Pointer<Float> points2,
+    Pointer<Int32> triangles,
+    Int32 numTriangles,
+    Float alpha,
+    Pointer<Utf8> outputPath);
 
 // Define the Dart functions that correspond to the C functions
 typedef _dart_version = Pointer<Utf8> Function();
@@ -34,6 +44,15 @@ typedef _dart_makeDelaunay = Pointer<Utf8> Function(
     int points_size,
     Pointer<Int32> result,
     Pointer<Int32> result_size);
+typedef _dart_morphImages = Pointer<Utf8> Function(
+    Pointer<Utf8> img1Path,
+    Pointer<Utf8> img2Path,
+    Pointer<Float> points1,
+    Pointer<Float> points2,
+    Pointer<Int32> triangles,
+    int numTriangles,
+    double alpha,
+    Pointer<Utf8> outputPath);
 
 // Bind the Dart functions to the C functions in the shared library
 final _version = nativeLib.lookupFunction<_c_version, _dart_version>('version');
@@ -42,6 +61,8 @@ final _convertToGrayScale =
         'convertToGrayScale');
 final _makeDelaunay = nativeLib
     .lookupFunction<_c_makeDelaunay, _dart_makeDelaunay>('makeDelaunay');
+final _morphImages =
+    nativeLib.lookupFunction<_c_morphImages, _dart_morphImages>('morphImages');
 
 class NativeOpencv {
   // Method channel for platform version
@@ -97,5 +118,53 @@ class NativeOpencv {
     malloc.free(resultSizePointer);
 
     return resultList;
+  }
+
+  void morphImages(
+      String img1Path,
+      String img2Path,
+      List<double> points1,
+      List<double> points2,
+      List<int> triangles,
+      double alpha,
+      String outputPath) {
+    final img1PathPointer = img1Path.toNativeUtf8();
+    final img2PathPointer = img2Path.toNativeUtf8();
+    final points1Pointer = malloc<Float>(points1.length);
+    final points2Pointer = malloc<Float>(points2.length);
+    final trianglesPointer = malloc<Int32>(triangles.length);
+    final outputPathPointer = outputPath.toNativeUtf8();
+
+    for (int i = 0; i < points1.length; i++) {
+      points1Pointer[i] = points1[i];
+    }
+    for (int i = 0; i < points2.length; i++) {
+      points2Pointer[i] = points2[i];
+    }
+    for (int i = 0; i < triangles.length; i++) {
+      trianglesPointer[i] = triangles[i];
+    }
+
+    final result = _morphImages(
+        img1PathPointer,
+        img2PathPointer,
+        points1Pointer,
+        points2Pointer,
+        trianglesPointer,
+        triangles.length,
+        alpha,
+        outputPathPointer);
+
+    malloc.free(img1PathPointer); 
+    malloc.free(img2PathPointer);
+    malloc.free(points1Pointer);
+    malloc.free(points2Pointer);
+    malloc.free(trianglesPointer);
+    malloc.free(outputPathPointer);
+
+    if (result != nullptr) {
+      final errorMessage = result.toDartString();
+      throw Exception(errorMessage);
+    }
   }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'mobile_camera_screen.dart';
 import 'text_recognition_screen.dart';
-import 'face_recognition_screen.dart'; // Import the face recognition screen
-import 'face_correspondences_screen.dart'; // Import the new screen
+import 'face_recognition_screen.dart';
+import 'face_correspondences_screen.dart';
+import 'face_morph_screen.dart';
+import 'tri_lists_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -44,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                       builder: (context) => const MobileCameraScreen()),
                 );
               },
-              child: const Text('Go to Camera Screen'),
+              child: const Text('Camera Screen'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
@@ -55,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                       builder: (context) => const TextRecognitionScreen()),
                 );
               },
-              child: const Text('Go to Text Recognition Screen'),
+              child: const Text('Text Recognition Screen'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
@@ -66,7 +68,7 @@ class HomeScreen extends StatelessWidget {
                       builder: (context) => const FaceRecognitionScreen()),
                 );
               },
-              child: const Text('Go to Face Recognition Screen'),
+              child: const Text('Face Recognition Screen'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
@@ -77,7 +79,29 @@ class HomeScreen extends StatelessWidget {
                       builder: (context) => const FaceCorrespondencesScreen()),
                 );
               },
-              child: const Text('Go to Face Correspondences Screen'),
+              child: const Text('Face Correspondences Screen'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const TriListsScreen()),
+                );
+              },
+              child: const Text('Tri Lists Screen'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FaceMorphScreen()),
+                );
+              },
+              child: const Text('Face Morph Screen'),
             ),
           ],
         ),

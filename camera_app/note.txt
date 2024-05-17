@@ -59,3 +59,4 @@ flutter emulators --launch Pixel_3a_API_34_extension_level_7_arm64-v8a
 flutter run -d 5F8105A6-B700-4073-911A-634D4BFDCBFB
 flutter run -d macos
 flutter run -d chrome
+

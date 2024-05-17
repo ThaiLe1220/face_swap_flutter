@@ -11,6 +11,7 @@ add_library( # Sets the name of the library.
     # Provides a relative path to your source file(s).
     ../ios/Classes/ImageProcessor/image_processor.cc
     ../ios/Classes/ImageProcessor/delaunay_triangulation.cc
+    ../ios/Classes/ImageProcessor/face_morph.cc
     ../ios/Classes/native_opencv.cc
 )
 
