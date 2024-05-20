@@ -1,3 +1,4 @@
+import 'package:camera_app/face_morph_screen_dev.dart';
 import 'package:flutter/material.dart';
 import 'mobile_camera_screen.dart';
 import 'text_recognition_screen.dart';
@@ -105,6 +106,17 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
                 child: const Text('Face Morph Screen'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FaceMorphScreenDev()),
+                  );
+                },
+                child: const Text('Face Morph Screen Develop'),
               ),
               const SizedBox(height: 8),
               ElevatedButton(
