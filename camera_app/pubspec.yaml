@@ -17,6 +17,11 @@ dependencies:
   native_opencv:
     path: ../native_opencv
   cupertino_icons: ^1.0.6
+  permission_handler: ^11.3.1
+  file_picker: ^5.0.1
+  path: ^1.9.0
+  ffmpeg_kit_flutter_min_gpl: ^6.0.3
+  image: ^4.1.7
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +30,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+
+

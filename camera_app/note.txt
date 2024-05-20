@@ -20,6 +20,9 @@ camera_app/android/app/src/main/AndroidManifest.xml:
 <manifest>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 </manifest>
 
 
@@ -50,12 +53,17 @@ pod deintegrate
 pod setup
 pod install --repo-update
 cd ..
-flutter pub get
+flutter run
 
 
 flutter devices
 flutter emulators --launch apple_ios_simulator
+adb -s emulator-5554 emu kill
 flutter emulators --launch Pixel_3a_API_34_extension_level_7_arm64-v8a
+
+~/Library/Android/sdk/emulator/emulator -avd Pixel_3a_API_34_extension_level_7_arm64-v8a -wipe-data
+~/Library/Android/sdk/emulator/emulator -avd Pixel_3a_API_34_extension_level_7_arm64-v8a -no-snapshot-load
+
 flutter run -d 5F8105A6-B700-4073-911A-634D4BFDCBFB
 flutter run -d macos
 flutter run -d chrome

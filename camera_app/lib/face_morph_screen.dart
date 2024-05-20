@@ -1,15 +1,12 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:io';
-import 'dart:math';
-import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
-import 'package:native_opencv/native_opencv.dart';
+import 'dart:io'; // For File operations
+import 'dart:math'; // For mathematical functions and calculations
+import 'dart:ui' as ui; // For handling images
+import 'package:camera_app/utils/face_morph_utils.dart'; // Custom utility functions for face morphing
+import 'package:flutter/material.dart'; // For UI components
 
-// Stateful widget for the face morphing screen
+// Main widget for the Face Morphing screen
 class FaceMorphScreen extends StatefulWidget {
   const FaceMorphScreen({super.key});
 
@@ -17,192 +14,33 @@ class FaceMorphScreen extends StatefulWidget {
   FaceMorphScreenState createState() => FaceMorphScreenState();
 }
 
+// State class for FaceMorphScreen
 class FaceMorphScreenState extends State<FaceMorphScreen> {
-  File? _image1; // Variable to store the first image file
-  File? _image2; // Variable to store the second image file
-  String? _outputImagePath; // Variable to store the path of the morphed image
-  List<Point<double>> _contours1 =
-      []; // List to store face contours from the first image
-  List<Point<double>> _contours2 =
-      []; // List to store face contours from the second image
-  List<int> _delaunayTriangles = []; // List to store Delaunay triangles
-  late ui.Image
-      _imageInfo1; // Variable to store image information for the first image
-  late ui.Image
-      _imageInfo2; // Variable to store image information for the second image
-  final picker = ImagePicker(); // Instance of ImagePicker for selecting images
-  final faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
-    enableContours: true,
-    enableLandmarks: true,
-    enableClassification: true,
-    enableTracking: true,
-    performanceMode: FaceDetectorMode.accurate,
-  )); // Configuring the face detector with various options
-  final NativeOpencv _nativeOpencv =
-      NativeOpencv(); // Instance of NativeOpencv for OpenCV operations
+  // Variables to hold the selected images and their corresponding info
+  File? _image1;
+  File? _image2;
+  String? _outputImagePath;
+  List<Point<double>> _contours1 = [];
+  List<Point<double>> _contours2 = [];
+  List<int> _delaunayTriangles = [];
+  late ui.Image _imageInfo1;
+  late ui.Image _imageInfo2;
 
-  // Function to pick an image from the gallery
-  Future<void> _pickImage(int imageNumber) async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      final imageFile = File(pickedFile.path);
-      final imageInfo = await _loadImage(imageFile);
-      setState(() {
-        if (imageNumber == 1) {
-          _image1 = imageFile;
-          _imageInfo1 = imageInfo;
-        } else {
-          _image2 = imageFile;
-          _imageInfo2 = imageInfo;
-        }
-      });
-      await _detectFaces(imageFile, imageNumber);
-    } else {
-      if (kDebugMode) {
-        print('No image selected.');
-      }
-    }
-  }
+  // Add variables to store the elapsed time
+  Duration? _pickImage1Time;
+  Duration? _pickImage2Time;
+  Duration? _detectFaces1Time;
+  Duration? _detectFaces2Time;
+  Duration? _morphImageTime;
 
-  // Function to load an image and return its information
-  Future<ui.Image> _loadImage(File imageFile) async {
-    final data = await imageFile.readAsBytes();
-    return await decodeImageFromList(data);
-  }
-
-  // Function to detect faces in the provided image
-  Future<void> _detectFaces(File image, int imageNumber) async {
-    final inputImage = InputImage.fromFile(image);
-    final faces = await faceDetector.processImage(inputImage);
-    List<Point<double>> contours = [];
-    for (var face in faces) {
-      for (var contour in face.contours.values) {
-        if (contour != null) {
-          for (var point in contour.points) {
-            contours.add(Point(point.x.toDouble(), point.y.toDouble()));
-          }
-        }
-      }
-    }
-    setState(() {
-      if (imageNumber == 1) {
-        _contours1 = contours;
-      } else {
-        _contours2 = contours;
-      }
-
-      // Compute correspondences and Delaunay triangulation if both images are loaded
-      if (_contours1.isNotEmpty && _contours2.isNotEmpty) {
-        _computeCorrespondences();
-        _computeDelaunay();
-      }
-    });
-
-    if (kDebugMode) {
-      print('Total Contours (Image $imageNumber): ${contours.length}');
-      for (var point in contours) {
-        print('Contour Point: (${point.x}, ${point.y})');
-      }
-    }
-  }
-
-  // Function to compute correspondences between the contours of the two images
-  void _computeCorrespondences() {
-    int count = min(_contours1.length, _contours2.length);
-    List<Point<double>> correspondences = List.generate(count, (index) {
-      return Point(
-        (_contours1[index].x + _contours2[index].x) / 2,
-        (_contours1[index].y + _contours2[index].y) / 2,
-      );
-    });
-    if (kDebugMode) {
-      print('Total Correspondences: ${correspondences.length}');
-      for (var point in correspondences) {
-        print('Correspondence Point: (${point.x}, ${point.y})');
-      }
-    }
-  }
-
-  // Function to compute Delaunay triangulation for the contours
-  void _computeDelaunay() {
-    if (_contours1.isEmpty || _contours2.isEmpty) return;
-
-    final points = _contours1.expand((point) => [point.x, point.y]).toList();
-    try {
-      final delaunayTriangles = _nativeOpencv.makeDelaunay(
-        _imageInfo1.width.toInt(),
-        _imageInfo1.height.toInt(),
-        points,
-      );
-      setState(() {
-        _delaunayTriangles = delaunayTriangles;
-      });
-
-      if (kDebugMode) {
-        print(
-            'Delaunay Triangles: ${_delaunayTriangles.length ~/ 3} triangles');
-        for (int i = 0; i < _delaunayTriangles.length; i += 3) {
-          print(
-              'Triangle: (${_delaunayTriangles[i]}, ${_delaunayTriangles[i + 1]}, ${_delaunayTriangles[i + 2]})');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error computing Delaunay triangulation: $e');
-      }
-    }
-  }
-
-  // Function to morph the images using the computed Delaunay triangulation and contours
-  Future<void> _morphImages(double alpha) async {
-    if (_image1 == null ||
-        _image2 == null ||
-        _contours1.isEmpty ||
-        _contours2.isEmpty ||
-        _delaunayTriangles.isEmpty) {
-      return;
-    }
-
-    final img1Path = _image1!.path;
-    final img2Path = _image2!.path;
-    final outputPath = '${Directory.systemTemp.path}/morphed_image.png';
-
-    final points1 = _contours1.expand((point) => [point.x, point.y]).toList();
-    final points2 = _contours2.expand((point) => [point.x, point.y]).toList();
-
-    try {
-      _nativeOpencv.morphImages(
-        img1Path,
-        img2Path,
-        points1,
-        points2,
-        _delaunayTriangles,
-        alpha,
-        outputPath,
-      );
-
-      setState(() {
-        _outputImagePath = outputPath;
-      });
-
-      if (kDebugMode) {
-        print('Morphed image saved to $outputPath');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error morphing images: $e');
-      }
-    }
-  }
-
-  // Dispose function to release resources
+  // Dispose resources when the widget is removed from the widget tree
   @override
   void dispose() {
-    faceDetector.close();
+    disposeResources();
     super.dispose();
   }
 
-  // Building the UI
+  // Build the UI for the screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -214,29 +52,94 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              // Button to pick the first image
               ElevatedButton(
-                onPressed: () => _pickImage(1),
+                onPressed: () => pickImage(
+                  1,
+                  (imageFile, imageInfo) =>
+                      _onImagePicked(imageFile, imageInfo, 1),
+                  (elapsed) {
+                    setState(() {
+                      _pickImage1Time = elapsed;
+                    });
+                  },
+                  detectFacesWithTiming,
+                  (elapsed) {
+                    setState(() {
+                      _detectFaces1Time = elapsed;
+                    });
+                  },
+                ),
                 child: const Text('Pick First Image'),
               ),
+              // Display the first image if selected
               _image1 == null
                   ? const Text('No image selected.')
                   : _buildImage(_image1!, _imageInfo1),
               const SizedBox(height: 8),
+              // Button to pick the second image
               ElevatedButton(
-                onPressed: () => _pickImage(2),
+                onPressed: () => pickImage(
+                  2,
+                  (imageFile, imageInfo) =>
+                      _onImagePicked(imageFile, imageInfo, 2),
+                  (elapsed) {
+                    setState(() {
+                      _pickImage2Time = elapsed;
+                    });
+                  },
+                  detectFacesWithTiming,
+                  (elapsed) {
+                    setState(() {
+                      _detectFaces2Time = elapsed;
+                    });
+                  },
+                ),
                 child: const Text('Pick Second Image'),
               ),
+              // Display the second image if selected
               _image2 == null
                   ? const Text('No image selected.')
                   : _buildImage(_image2!, _imageInfo2),
               const SizedBox(height: 8),
+              // Button to morph the images
               ElevatedButton(
-                onPressed: () => _morphImages(0.5),
+                onPressed: () => morphImages(
+                  _image1,
+                  _image2,
+                  _contours1,
+                  _contours2,
+                  _delaunayTriangles,
+                  0.5,
+                  _onImageMorphed,
+                  (elapsed) {
+                    setState(() {
+                      _morphImageTime = elapsed;
+                    });
+                  },
+                ),
                 child: const Text('Morph Images'),
               ),
+              // Display the morphed image if available
               _outputImagePath == null
                   ? const Text('No morphed image.')
                   : Image.file(File(_outputImagePath!)),
+              // Display the elapsed times
+              if (_pickImage1Time != null)
+                Text(
+                    'Time taken to pick image 1: ${_pickImage1Time!.inMilliseconds} ms'),
+              if (_detectFaces1Time != null)
+                Text(
+                    'Time taken to detect faces in image 1: ${_detectFaces1Time!.inMilliseconds} ms'),
+              if (_pickImage2Time != null)
+                Text(
+                    'Time taken to pick image 2: ${_pickImage2Time!.inMilliseconds} ms'),
+              if (_detectFaces2Time != null)
+                Text(
+                    'Time taken to detect faces in image 2: ${_detectFaces2Time!.inMilliseconds} ms'),
+              if (_morphImageTime != null)
+                Text(
+                    'Time taken to morph images: ${_morphImageTime!.inMilliseconds} ms'),
             ],
           ),
         ),
@@ -244,7 +147,59 @@ class FaceMorphScreenState extends State<FaceMorphScreen> {
     );
   }
 
-  // Function to build the widget displaying the image
+  // Callback function when an image is picked
+  void _onImagePicked(File imageFile, ui.Image imageInfo, int imageNumber) {
+    setState(() {
+      if (imageNumber == 1) {
+        _image1 = imageFile;
+        _imageInfo1 = imageInfo;
+        _contours1.clear(); // Clear previous contours for image1
+      } else if (imageNumber == 2) {
+        _image2 = imageFile;
+        _imageInfo2 = imageInfo;
+        _contours2.clear(); // Clear previous contours for image2
+      }
+      _delaunayTriangles.clear(); // Clear previous Delaunay triangles
+      _outputImagePath = null; // Clear the morphed image path
+    });
+    // Detect faces after image is picked
+    detectFacesWithTiming(imageFile, imageNumber, (contours) {
+      setState(() {
+        if (imageNumber == 1) {
+          _contours1 = contours;
+        } else {
+          _contours2 = contours;
+        }
+
+        if (_contours1.isNotEmpty && _contours2.isNotEmpty) {
+          computeCorrespondences(_contours1, _contours2, (correspondences) {
+            computeDelaunay(_contours1, _imageInfo1, (delaunayTriangles) {
+              setState(() {
+                _delaunayTriangles = delaunayTriangles;
+              });
+            });
+          });
+        }
+      });
+    }, (elapsed) {
+      setState(() {
+        if (imageNumber == 1) {
+          _detectFaces1Time = elapsed;
+        } else {
+          _detectFaces2Time = elapsed;
+        }
+      });
+    });
+  }
+
+  // Callback function when the images are morphed
+  void _onImageMorphed(String outputPath) {
+    setState(() {
+      _outputImagePath = outputPath;
+    });
+  }
+
+  // Widget to display the selected image
   Widget _buildImage(File imageFile, ui.Image imageInfo) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
