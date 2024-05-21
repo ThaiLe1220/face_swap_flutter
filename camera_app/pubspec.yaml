@@ -30,6 +30,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
+  assets:
+    - assets/videos/f_1.mp4
+    - assets/videos/f_3.mp4
+    - assets/videos/f_3_plus.mp4
+    - assets/videos/f_5.mp4
+    - assets/videos/f_11.mp4
+    - assets/videos/m_11.mp4
+    
 
 

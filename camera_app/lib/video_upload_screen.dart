@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:file_picker/file_picker.dart';
@@ -18,6 +19,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
   String? _videoPath;
   List<File> _frames = [];
   bool _showFrames = false;
+  String? _outputPath;
 
   @override
   void initState() {
@@ -68,7 +70,12 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
 
     setState(() {
       _frames = frameFiles;
+      _outputPath = outputPath; // Store the outputPath in the state variable
     });
+
+    if (kDebugMode) {
+      print('Output path: $outputPath');
+    } // Print the outputPath to the console
   }
 
   String _formatDuration(Duration duration) {
@@ -157,9 +164,9 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 4.0,
-                  mainAxisSpacing: 4.0,
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 0.0,
+                  mainAxisSpacing: 8.0,
                 ),
                 itemCount: _frames.length,
                 itemBuilder: (context, index) {
@@ -167,6 +174,15 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                 },
               )
             : const Text('No frames extracted.')
+        : const SizedBox.shrink();
+  }
+
+  Widget _buildOutputPathDisplay() {
+    return _outputPath != null
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('Output path: $_outputPath'),
+          )
         : const SizedBox.shrink();
   }
 
@@ -207,6 +223,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
               ),
               const SizedBox(height: 16),
               _buildFrameGallery(),
+              const SizedBox(height: 16),
+              _buildOutputPathDisplay(), // Add this line
               const SizedBox(height: 16),
             ],
           ),
