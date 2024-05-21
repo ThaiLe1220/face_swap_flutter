@@ -107,7 +107,7 @@ cv::Mat morph_images(cv::Mat &img1, cv::Mat &img2, std::vector<cv::Point2f> &poi
     }
 
     std::vector<cv::Point> points;
-    std::vector<int> mouth_list_ids_dlib = {60, 61, 62, 63, 64, 65, 66, 67};
+    std::vector<int> mouth_list_ids_dlib = {99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116};
     for (int idx : mouth_list_ids_dlib)
     {
         points.push_back(cv::Point(points1[idx].x, points1[idx].y));
@@ -129,6 +129,8 @@ cv::Mat morph_images(cv::Mat &img1, cv::Mat &img2, std::vector<cv::Point2f> &poi
     cv::bitwise_not(mask, mask);
     cv::fillPoly(mask, points, cv::Scalar(255, 255, 255));
     cv::Mat img1_no_face;
+    cv::Mat mouth_mask = cv::Mat::zeros(img1.size(), CV_8UC1);
+    cv::fillPoly(mouth_mask, points, cv::Scalar(255, 255, 255));
     cv::Mat result_mix;
     cv::Mat result_nor;
     cv::bitwise_and(img1, img1, img1_no_face, mask);
@@ -138,6 +140,8 @@ cv::Mat morph_images(cv::Mat &img1, cv::Mat &img2, std::vector<cv::Point2f> &poi
     cv::seamlessClone(morphed_img, img1, mask, center_face, result_mix, cv::MIXED_CLONE);
 
     cv::Mat result = selective_alpha_blend(result_nor, result_mix, mask, alpha);
-
+    result = selective_alpha_blend(result, img1, mouth_mask, 0.5);
+    // cv::Mat result;
+    // cv::add(morphed_img, img1_no_face, result);
     return result;
 }

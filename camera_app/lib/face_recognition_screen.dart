@@ -89,11 +89,13 @@ class FaceRecognitionScreenState extends State<FaceRecognitionScreen> {
         // Collect and print contour information
         for (FaceContourType contourType in face.contours.keys) {
           final contour = face.contours[contourType];
+          print('contourType: ${contourType.name}');
           if (contour != null) {
             _contourInfoText += 'Contour ${contourType.name}:\n';
             for (Point<int> point in contour.points) {
               final position = point.toDouble();
               _contourInfoText += '(${position.x}, ${position.y})\n';
+              print('ids: ${totalContours}');
               totalContours++;
             }
           }
@@ -149,6 +151,14 @@ class FaceRecognitionScreenState extends State<FaceRecognitionScreen> {
                                         if (contour == null) {
                                           return [];
                                         }
+                                        print(contour.type.runtimeType);  // This will print the type of contour.type
+                                        Color temp;
+                                        if (contour.type == FaceContourType.upperLipBottom || contour.type == FaceContourType.lowerLipTop){
+                                          temp = Colors.blue;
+                                        } else {
+                                          temp = Colors.red;
+                                        }
+                                        final pointColor = temp;
                                         return contour.points.map((point) {
                                           final position = point.toDouble();
                                           return Positioned(
@@ -160,9 +170,9 @@ class FaceRecognitionScreenState extends State<FaceRecognitionScreen> {
                                                     _imageInfo.height) *
                                                 _imageInfo.height *
                                                 scale,
-                                            child: const Icon(
+                                            child: Icon(
                                               Icons.circle,
-                                              color: Colors.blue,
+                                              color: pointColor,
                                               size:
                                                   2, // Smaller dot size for contours
                                             ),

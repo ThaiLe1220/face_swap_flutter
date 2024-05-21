@@ -158,6 +158,38 @@ void computeDelaunay(List<Point<double>> contours1, ui.Image imageInfo1,
   }
 }
 
+// Function to compute Delaunay triangulation for the contours of the first image
+void computeDelaunayWithTime(List<Point<double>> contours1, ui.Image imageInfo1,
+    Function(List<int>) onDelaunayComputed, Function(Duration) onTimeMeasured) {
+  if (contours1.isEmpty) return;
+  final stopwatch = Stopwatch()..start();
+  final points = contours1.expand((point) => [point.x, point.y]).toList();
+  try {
+    final delaunayTriangles = nativeOpencv.makeDelaunay(
+      imageInfo1.width.toInt(),
+      imageInfo1.height.toInt(),
+      points,
+    );
+    // Call the provided callback function with the computed Delaunay triangles
+    onDelaunayComputed(delaunayTriangles);
+    stopwatch.stop();
+    onTimeMeasured(stopwatch.elapsed);
+    
+    if (kDebugMode) {
+      print('Delaunay Triangles: ${delaunayTriangles.length ~/ 3} triangles');
+      for (int i = 0; i < delaunayTriangles.length; i += 3) {
+        print(
+            'Triangle: (${delaunayTriangles[i]}, ${delaunayTriangles[i + 1]}, ${delaunayTriangles[i + 2]})');
+      }
+      print('Total time for Delaunay: ${stopwatch.elapsed.inMilliseconds} ms');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error computing Delaunay triangulation: $e');
+    }
+  }
+}
+
 // Function to morph two images using the computed Delaunay triangulation and contours with time measurement
 Future<void> morphImages(
   File? image1,

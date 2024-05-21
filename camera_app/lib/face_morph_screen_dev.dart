@@ -32,6 +32,7 @@ class FaceMorphScreenDevState extends State<FaceMorphScreenDev> {
   Duration? _detectFaces1Time;
   Duration? _detectFaces2Time;
   Duration? _morphImageTime;
+  Duration? _delaunayTrianglesTime;
 
   // Dispose resources when the widget is removed from the widget tree
   @override
@@ -125,21 +126,24 @@ class FaceMorphScreenDevState extends State<FaceMorphScreenDev> {
                   ? const Text('No morphed image.')
                   : Image.file(File(_outputImagePath!)),
               // Display the elapsed times
-              if (_pickImage1Time != null)
-                Text(
-                    'Time taken to pick image 1: ${_pickImage1Time!.inMilliseconds} ms'),
+              // if (_pickImage1Time != null)
+              //   Text(
+              //       'Time taken to pick image 1: ${_pickImage1Time!.inMilliseconds} ms'),
               if (_detectFaces1Time != null)
                 Text(
                     'Time taken to detect faces in image 1: ${_detectFaces1Time!.inMilliseconds} ms'),
-              if (_pickImage2Time != null)
-                Text(
-                    'Time taken to pick image 2: ${_pickImage2Time!.inMilliseconds} ms'),
+              // if (_pickImage2Time != null)
+              //   Text(
+              //       'Time taken to pick image 2: ${_pickImage2Time!.inMilliseconds} ms'),
               if (_detectFaces2Time != null)
                 Text(
                     'Time taken to detect faces in image 2: ${_detectFaces2Time!.inMilliseconds} ms'),
               if (_morphImageTime != null)
                 Text(
                     'Time taken to morph images: ${_morphImageTime!.inMilliseconds} ms'),
+              if (_delaunayTrianglesTime != null)
+                Text(
+                  'Time _delaunayTrianglesTime: ${_delaunayTrianglesTime!.inMilliseconds} ms'),
             ],
           ),
         ),
@@ -173,9 +177,13 @@ class FaceMorphScreenDevState extends State<FaceMorphScreenDev> {
 
         if (_contours1.isNotEmpty && _contours2.isNotEmpty) {
           computeCorrespondences(_contours1, _contours2, (correspondences) {
-            computeDelaunay(_contours1, _imageInfo1, (delaunayTriangles) {
+            computeDelaunayWithTime(_contours1, _imageInfo1, (delaunayTriangles) {
               setState(() {
                 _delaunayTriangles = delaunayTriangles;
+              });
+            }, (elapsed) {
+              setState(() {
+                _detectFaces1Time = elapsed;
               });
             });
           });
