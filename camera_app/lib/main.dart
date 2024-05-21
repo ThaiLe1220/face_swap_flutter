@@ -1,12 +1,13 @@
-import 'package:camera_app/face_morph_screen_dev.dart';
 import 'package:flutter/material.dart';
-import 'mobile_camera_screen.dart';
-import 'text_recognition_screen.dart';
-import 'face_recognition_screen.dart';
-import 'face_correspondences_screen.dart';
-import 'face_morph_screen.dart';
-import 'tri_lists_screen.dart';
-import 'video_upload_screen.dart';
+import 'screens/mobile_camera_screen.dart';
+import 'screens/text_recognition_screen.dart';
+import 'screens/face_recognition_screen.dart';
+import 'screens/face_correspondences_screen.dart';
+import 'screens/face_morph_screen.dart';
+import 'screens/tri_lists_screen.dart';
+import 'screens/video_upload_screen.dart';
+import 'screens/video_player_screen.dart'; // Import the new screen
+import 'screens/face_morph_screen_dev.dart';
 
 void main() {
   runApp(const MyApp());
@@ -128,6 +129,18 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
                 child: const Text('Video Upload Screen'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const VideoPlayerScreen()), // Add this line
+                  );
+                },
+                child: const Text('Video Player Screen'),
               ),
             ],
           ),
