@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
+// import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
 
 class VideoUploadScreen extends StatefulWidget {
   const VideoUploadScreen({super.key});
@@ -58,7 +58,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     final outputPath = directory.path;
 
     final command = '-i $_videoPath -vf fps=30 $outputPath/frame_%03d.png';
-    await FFmpegKit.execute(command);
+    // await FFmpegKit.execute(command);
 
     final frameFiles = Directory(outputPath)
         .listSync()

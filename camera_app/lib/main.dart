@@ -7,6 +7,8 @@ import 'face_correspondences_screen.dart';
 import 'face_morph_screen.dart';
 import 'tri_lists_screen.dart';
 import 'video_upload_screen.dart';
+import 'video_gray.dart';
+import 'video_swap.dart';
 
 void main() {
   runApp(const MyApp());
@@ -128,6 +130,28 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
                 child: const Text('Video Upload Screen'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const VideoGray()),
+                  );
+                },
+                child: const Text('Video Gray'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const VideoSwap()),
+                  );
+                },
+                child: const Text('Video Swap'),
               ),
             ],
           ),

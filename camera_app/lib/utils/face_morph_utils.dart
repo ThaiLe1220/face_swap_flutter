@@ -17,7 +17,7 @@ final faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
   // enableLandmarks: true,
   // enableClassification: true,
   // enableTracking: true,
-  performanceMode: FaceDetectorMode.fast,
+  performanceMode: FaceDetectorMode.accurate,
 ));
 
 // Create an instance of NativeOpencv for performing OpenCV operations
@@ -53,7 +53,7 @@ Future<void> pickImage(
     onTimeMeasured(stopwatch.elapsed);
 
     if (kDebugMode) {
-      print('No image selected.');
+      // print('No image selected.');
     }
   }
 }
@@ -99,9 +99,9 @@ Future<void> detectFacesWithTiming(
   onContoursDetected(contours);
 
   if (kDebugMode) {
-    print('Total Contours (Image $imageNumber): ${contours.length}');
+    // print('Total Contours (Image $imageNumber): ${contours.length}');
     for (var point in contours) {
-      print('Contour Point: (${point.x}, ${point.y})');
+      // print('Contour Point: (${point.x}, ${point.y})');
     }
   }
 }
@@ -122,9 +122,9 @@ void computeCorrespondences(
   onCorrespondencesComputed(correspondences);
 
   if (kDebugMode) {
-    print('Total Correspondences: ${correspondences.length}');
+    // print('Total Correspondences: ${correspondences.length}');
     for (var point in correspondences) {
-      print('Correspondence Point: (${point.x}, ${point.y})');
+      // print('Correspondence Point: (${point.x}, ${point.y})');
     }
   }
 }
@@ -145,15 +145,15 @@ void computeDelaunay(List<Point<double>> contours1, ui.Image imageInfo1,
     onDelaunayComputed(delaunayTriangles);
 
     if (kDebugMode) {
-      print('Delaunay Triangles: ${delaunayTriangles.length ~/ 3} triangles');
+      // print('Delaunay Triangles: ${delaunayTriangles.length ~/ 3} triangles');
       for (int i = 0; i < delaunayTriangles.length; i += 3) {
-        print(
-            'Triangle: (${delaunayTriangles[i]}, ${delaunayTriangles[i + 1]}, ${delaunayTriangles[i + 2]})');
+        // print(
+        //     'Triangle: (${delaunayTriangles[i]}, ${delaunayTriangles[i + 1]}, ${delaunayTriangles[i + 2]})');
       }
     }
   } catch (e) {
     if (kDebugMode) {
-      print('Error computing Delaunay triangulation: $e');
+      // print('Error computing Delaunay triangulation: $e');
     }
   }
 }
@@ -176,16 +176,16 @@ void computeDelaunayWithTime(List<Point<double>> contours1, ui.Image imageInfo1,
     onTimeMeasured(stopwatch.elapsed);
     
     if (kDebugMode) {
-      print('Delaunay Triangles: ${delaunayTriangles.length ~/ 3} triangles');
+      // print('Delaunay Triangles: ${delaunayTriangles.length ~/ 3} triangles');
       for (int i = 0; i < delaunayTriangles.length; i += 3) {
-        print(
-            'Triangle: (${delaunayTriangles[i]}, ${delaunayTriangles[i + 1]}, ${delaunayTriangles[i + 2]})');
+        // print(
+        //     'Triangle: (${delaunayTriangles[i]}, ${delaunayTriangles[i + 1]}, ${delaunayTriangles[i + 2]})');
       }
-      print('Total time for Delaunay: ${stopwatch.elapsed.inMilliseconds} ms');
+      // print('Total time for Delaunay: ${stopwatch.elapsed.inMilliseconds} ms');
     }
   } catch (e) {
     if (kDebugMode) {
-      print('Error computing Delaunay triangulation: $e');
+      // print('Error computing Delaunay triangulation: $e');
     }
   }
 }
@@ -215,6 +215,7 @@ Future<void> morphImages(
 
   final img1Path = image1.path;
   final img2Path = image2.path;
+
   final outputPath = '${Directory.systemTemp.path}/morphed_image.png';
 
   final points1 = contours1.expand((point) => [point.x, point.y]).toList();
@@ -238,17 +239,79 @@ Future<void> morphImages(
     onImageMorphed(outputPath);
 
     if (kDebugMode) {
-      print('Morphed image saved to $outputPath');
+      // print('Morphed image saved to $outputPath');
     }
   } catch (e) {
     stopwatch.stop();
     onTimeMeasured(stopwatch.elapsed);
 
     if (kDebugMode) {
-      print('Error morphing images: $e');
+      // print('Error morphing images: $e');
     }
   }
 }
+
+Future<void> morphImagesFrame(
+    String outputPath,
+    File? image1,
+    File? image2,
+    List<Point<double>> contours1,
+    List<Point<double>> contours2,
+    List<int> delaunayTriangles,
+    double alpha,
+    Function(String) onImageMorphed,
+    Function(Duration) onTimeMeasured,
+    ) async {
+  final stopwatch = Stopwatch()..start();
+
+  if (image1 == null ||
+      image2 == null ||
+      contours1.isEmpty ||
+      contours2.isEmpty ||
+      delaunayTriangles.isEmpty) {
+    stopwatch.stop();
+    onTimeMeasured(stopwatch.elapsed);
+    return;
+  }
+
+  final img1Path = image1.path;
+  final img2Path = image2.path;
+
+  // final outputPath = '${Directory.systemTemp.path}/morphed_image.png';
+
+  final points1 = contours1.expand((point) => [point.x, point.y]).toList();
+  final points2 = contours2.expand((point) => [point.x, point.y]).toList();
+
+  try {
+    nativeOpencv.morphImages(
+      img1Path,
+      img2Path,
+      points1,
+      points2,
+      delaunayTriangles,
+      alpha,
+      outputPath,
+    );
+
+    stopwatch.stop();
+    onTimeMeasured(stopwatch.elapsed);
+
+    // Call the provided callback function with the path of the morphed image
+    onImageMorphed(outputPath);
+
+    if (kDebugMode) {
+      // print('Morphed image saved to $outputPath');
+    }
+  } catch (e) {
+    stopwatch.stop();
+    onTimeMeasured(stopwatch.elapsed);
+
+    if (kDebugMode) {
+      // print('Error morphing images: $e');
+    }
+  }
+}
+
 
 // Function to dispose of resources when they are no longer needed
 void disposeResources() {

@@ -125,16 +125,10 @@ class FaceMorphScreenDevState extends State<FaceMorphScreenDev> {
               _outputImagePath == null
                   ? const Text('No morphed image.')
                   : Image.file(File(_outputImagePath!)),
-              // Display the elapsed times
-              // if (_pickImage1Time != null)
-              //   Text(
-              //       'Time taken to pick image 1: ${_pickImage1Time!.inMilliseconds} ms'),
               if (_detectFaces1Time != null)
                 Text(
                     'Time taken to detect faces in image 1: ${_detectFaces1Time!.inMilliseconds} ms'),
-              // if (_pickImage2Time != null)
-              //   Text(
-              //       'Time taken to pick image 2: ${_pickImage2Time!.inMilliseconds} ms'),
+
               if (_detectFaces2Time != null)
                 Text(
                     'Time taken to detect faces in image 2: ${_detectFaces2Time!.inMilliseconds} ms'),

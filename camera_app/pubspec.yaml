@@ -20,8 +20,12 @@ dependencies:
   permission_handler: ^11.3.1
   file_picker: ^5.0.1
   path: ^1.9.0
-  ffmpeg_kit_flutter_min_gpl: ^6.0.3
   image: ^4.1.7
+  ffmpeg_kit_flutter: ^6.0.3
+  video_editor: ^3.0.0
+  chewie: ^1.8.1
+  flutter_spinkit: ^5.1.0
+#  flutter_ffmpeg: ^0.4.2
 
 dev_dependencies:
   flutter_test:

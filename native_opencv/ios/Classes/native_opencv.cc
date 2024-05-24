@@ -86,6 +86,8 @@ extern "C"
 		}
 		catch (const std::exception &e)
 		{
+			cv::Mat img1 = cv::imread(img1Path);
+			cv::imwrite(outputPath, img1);
 			return e.what(); // Return the error message
 		}
 	}
